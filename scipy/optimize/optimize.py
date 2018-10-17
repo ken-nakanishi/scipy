@@ -620,7 +620,10 @@ def _minimize_neldermead(func, x0, args=(), callback=None,
         sim = numpy.take(sim, ind, 0)
         fsim = numpy.take(fsim, ind, 0)
         if callback is not None:
-            callback(sim[0])
+            try:
+                callback(sim[0])
+            except:
+                break
         iterations += 1
         if retall:
             allvecs.append(sim[0])
@@ -991,7 +994,19 @@ def _minimize_bfgs(fun, x0, args=(), jac=None, callback=None,
         except _LineSearchError:
             # Line search failed to find a better solution.
             warnflag = 2
-            break
+            k += 1
+            if callback is not None:
+                try:
+                    callback(xk)
+                except:
+                    break
+            continue
+
+        # ret = line_search_wolfe1(f, myfprime, xk, pk, gfk, old_fval, old_old_fval)
+        # if ret[0] is None:
+        #     k += 1
+        #     continue
+        # alpha_k, fc, gc, old_fval, old_old_fval, gfkp1 = ret
 
         xkp1 = xk + alpha_k * pk
         if retall:
@@ -1004,7 +1019,10 @@ def _minimize_bfgs(fun, x0, args=(), jac=None, callback=None,
         yk = gfkp1 - gfk
         gfk = gfkp1
         if callback is not None:
-            callback(xk)
+            try:
+                callback(xk)
+            except:
+                break
         k += 1
         gnorm = vecnorm(gfk, ord=norm)
         if (gnorm <= gtol):
@@ -1325,7 +1343,13 @@ def _minimize_cg(fun, x0, args=(), jac=None, callback=None,
         except _LineSearchError:
             # Line search failed to find a better solution.
             warnflag = 2
-            break
+            k += 1
+            if callback is not None:
+                try:
+                    callback(xk)
+                except:
+                    break
+            continue
 
         # Reuse already computed results if possible
         if alpha_k == cached_step[0]:
@@ -1336,7 +1360,10 @@ def _minimize_cg(fun, x0, args=(), jac=None, callback=None,
         if retall:
             allvecs.append(xk)
         if callback is not None:
-            callback(xk)
+            try:
+                callback(xk)
+            except:
+                break
         k += 1
 
     fval = old_fval
@@ -1616,7 +1643,10 @@ def _minimize_newtoncg(fun, x0, args=(), jac=None, hess=None, hessp=None,
         update = alphak * pk
         xk = xk + update        # upcast if necessary
         if callback is not None:
-            callback(xk)
+            try:
+                callback(xk)
+            except:
+                break
         if retall:
             allvecs.append(xk)
         k += 1
@@ -2582,7 +2612,10 @@ def _minimize_powell(func, x0, args=(), callback=None,
                 bigind = i
         iter += 1
         if callback is not None:
-            callback(x)
+            try:
+                callback(x)
+            except:
+                break
         if retall:
             allvecs.append(x)
         bnd = ftol * (numpy.abs(fx) + numpy.abs(fval)) + 1e-20
